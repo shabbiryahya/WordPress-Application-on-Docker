@@ -1,0 +1,71 @@
+#start
+version: '3'
+services:
+  mysql_db:
+    networks:
+      - my_network 
+    build:
+       context: mysql
+       dockerfile: Dockerfile
+    image: mysql_custome_image
+    container_name: mysql_db_conatiner
+
+    restart: always
+
+    ports:
+      - '3306:3306'
+
+    env_file:
+      - .env_password
+    volumes:
+      -  mysql_db_volume:/var/lib/mysql/
+
+# Wordpress container
+  wordpress_app:
+    networks:
+      - my_network
+    depends_on:
+      - mysql_db
+    build:
+      context: wordpress
+      dockerfile: Dockerfile
+    image: wordpress_custome_image
+    container_name: wordpress_container
+
+    restart: always
+
+    env_file:
+      - .env_password
+    ports:
+      - '80:80'
+    expose:
+      - '80'
+    volumes:
+      - wordpress_volume:/var/www/html/
+
+#PHP Myadmin Conatiner
+  phpmyadmin:
+    networks:
+      - my_network
+    build:
+      context: phpmyadmin
+      dockerfile: Dockerfile
+    image: phpmyadmin_custome_image
+    container_name: phpmyadmin_container
+    links:
+      - mysql_db
+    restart: always
+
+    env_file:
+      - .env_password
+    ports:
+      - "8080:80"
+    expose:
+      - "8080"
+
+networks:
+  my_network:
+volumes:
+  mysql_db_volume:
+  wordpress_volume:
+
